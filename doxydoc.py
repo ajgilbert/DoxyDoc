@@ -44,13 +44,13 @@ def get_function_args(fn_str):
     fn_str = re.sub(r"\w+::", "", fn_str)
 
     # Remove template arguments in types
-    fn_str = re.sub(r"([a-zA-Z_]\w*)\s*<.+?>", r"\1", fn_str)
+    fn_str = re.sub(r"([a-zA-Z_]\w*)\s*<.+>", r"\1", fn_str)
 
     # Remove parentheses
-    fn_str = re.sub(r"\((.*?)\)", r"\1", fn_str)
+    fn_str = re.sub(r"\((.*)\)", r"\1", fn_str)
 
     # Remove arrays
-    fn_str = re.sub(r"\[.*?\]", "", fn_str)
+    fn_str = re.sub(r"\[.*\]", "", fn_str)
     print('After: {0}'.format(fn_str))
 
     arg_regex = r"(?P<type>[a-zA-Z_]\w*)\s*(?P<name>[a-zA-Z_]\w*)"
@@ -190,13 +190,13 @@ class DoxydocCommand(sublime_plugin.TextCommand):
 
 
     def regular_snippet(self):
-        snippet = ("\n * {0}brief ${{1:[brief description]}}"
-                   "\n * {0}details ${{2:[long description]}}\n * \n */".format(self.command_type))
+        snippet = ("\n * ${{1:[brief description]}}"
+                   "\n *\n * ${{2:[long description]}}\n *\n */".format())
         return snippet
 
     def template_snippet(self, template_args):
-        snippet = ("\n * {0}brief ${{1:[brief description]}}"
-                   "\n * {0}details ${{2:[long description]}}\n * ".format(self.command_type))
+        snippet = ("\n * ${{1:[brief description]}}"
+                   "\n *\n * ${{2:[long description]}}\n *".format())
 
         index = 3
         for x in template_args:
@@ -209,8 +209,8 @@ class DoxydocCommand(sublime_plugin.TextCommand):
     def template_function_snippet(self, regex_obj, template_args):
         snippet = ""
         index = 1
-        snippet =  ("\n * {0}brief ${{{1}:[brief description]}}"
-                    "\n * {0}details ${{{2}:[long description]}}\n * ".format(self.command_type, index, index + 1))
+        snippet =  ("\n * ${{{0}:[brief description]}}"
+                    "\n *\n * ${{{1}:[long description]}}\n * ".format(index, index + 1))
         index += 2
 
         # Function arguments
@@ -239,14 +239,14 @@ class DoxydocCommand(sublime_plugin.TextCommand):
     def function_snippet(self, regex_obj):
         fn = regex_obj.group(0)
         index = 1
-        snippet =  ("\n * {0}brief ${{{1}:[brief description]}}"
-                    "\n * {0}details ${{{2}:[long description]}}".format(self.command_type, index, index + 1))
+        snippet =  ("\n * ${{{0}:[brief description]}}"
+                    "\n *\n * ${{{1}:[long description]}}".format(index, index + 1))
         index += 2
 
         args = regex_obj.group("args")
 
         if args and args.lower() != "void":
-            snippet += "\n * "
+            snippet += "\n *"
             args = get_function_args(args)
             for _, name in args:
                 snippet += "\n * {0}param {1} ${{{2}:[description]}}".format(self.command_type, name, index)
